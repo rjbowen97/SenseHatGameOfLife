@@ -22,7 +22,11 @@ for currentRowIndex in range(0, 8):
 
 for currentInteration in range(0, 100):
     time.sleep(1)
+
+    bufferGrid = []
     for currentRowIndex in range(0, 8):
+
+        currentBufferRow = []
         for currentColumnIndex in range(0, 8):
             totalActiveAdjacentCells = 0
 
@@ -58,8 +62,19 @@ for currentInteration in range(0, 100):
                     totalActiveAdjacentCells += 1
 
             print(totalActiveAdjacentCells)
+            if grid[currentRowIndex][currentColumnIndex] == off:
+                if totalActiveAdjacentCells == 3:
+                    currentBufferRow.append(on)
+                else:
+                    currentBufferRow.append(off)
+            else:
+                if totalActiveAdjacentCells < 2 or totalActiveAdjacentCells > 3:
+                    currentBufferRow.append(off)
+                else:
+                    currentBufferRow.append(on)
 
+    grid = bufferGrid
 
-displayGrid = [
-    currentCell for currentSublist in grid for currentCell in currentSublist]
-sense.set_pixels(displayGrid)
+    displayGrid = [
+        currentCell for currentSublist in grid for currentCell in currentSublist]
+    sense.set_pixels(displayGrid)
