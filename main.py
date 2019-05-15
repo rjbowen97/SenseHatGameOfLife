@@ -1,17 +1,12 @@
 from sense_hat import SenseHat
 import random
 import time
-sense = SenseHat()
 
+sense = SenseHat()
 sense.low_light = True
 
-
-black = [0, 0, 0]
-off = black
-
-
+off = [0,0,0]
 on = [255, 255, 0]
-
 
 def initGrid():
     grid = []
@@ -22,7 +17,7 @@ def initGrid():
             if random.randint(0, 1):
                 currentRow.append(on)
             else:
-                currentRow.append(black)
+                currentRow.append(off)
         grid.append(currentRow)
     return grid
 
@@ -84,12 +79,12 @@ while True:
                     currentBufferRow.append(on)
         bufferGrid.append(currentBufferRow)
 
-    if grid == bufferGrid or currentIteration % 1000 == 0:
+    if grid == bufferGrid or currentIteration == 1000:
         bufferGrid = initGrid()
-        on[0] = random.randint(0,255)
-        on[1] = random.randint(0,255)
-        on[2] = random.randint(0,255)
-
+        on[0] = random.randint(0, 255)
+        on[1] = random.randint(0, 255)
+        on[2] = random.randint(0, 255)
+        currentIteration = 0
 
     grid = bufferGrid
 
