@@ -3,25 +3,40 @@ import random
 import time
 sense = SenseHat()
 
-black = [0, 0, 0]  # Red
+sense.low_light = True
+
+
+black = [0, 0, 0]
 off = black
 
-red = [255, 0, 0]  # Red
-on = red
+red = [255, 0, 0]
+green = [0, 255, 0]
+on = green
 
-grid = []
 
-for currentRowIndex in range(0, 8):
-    currentRow = []
-    for currentColumnIndex in range(0, 8):
-        if random.randint(0, 1):
-            currentRow.append(on)
-        else:
-            currentRow.append(black)
-    grid.append(currentRow)
 
-for currentInteration in range(0, 100):
-    time.sleep(1)
+def initGrid():
+    grid = []
+
+    for currentRowIndex in range(0, 8):
+        currentRow = []
+        for currentColumnIndex in range(0, 8):
+            if random.randint(0, 1):
+                currentRow.append(on)
+            else:
+                currentRow.append(black)
+        grid.append(currentRow)    
+    return grid
+
+grid = initGrid()
+
+currentIteration = 0
+while True:
+    if currentIteration == 100:
+        sense.set_pixel(0,0,red)
+        grid = initGrid()
+        currentIteration = 0
+    time.sleep(0.10)
 
     bufferGrid = []
     for currentRowIndex in range(0, 8):
@@ -61,7 +76,6 @@ for currentInteration in range(0, 100):
                 if grid[currentRowIndex][currentColumnIndex + 1] == on:
                     totalActiveAdjacentCells += 1
 
-            print(totalActiveAdjacentCells)
             if grid[currentRowIndex][currentColumnIndex] == off:
                 if totalActiveAdjacentCells == 3:
                     currentBufferRow.append(on)
@@ -72,9 +86,11 @@ for currentInteration in range(0, 100):
                     currentBufferRow.append(off)
                 else:
                     currentBufferRow.append(on)
+        bufferGrid.append(currentBufferRow)
 
     grid = bufferGrid
 
     displayGrid = [
         currentCell for currentSublist in grid for currentCell in currentSublist]
     sense.set_pixels(displayGrid)
+    currentIteration += 1
