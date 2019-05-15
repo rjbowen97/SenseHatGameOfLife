@@ -60,6 +60,8 @@ def getAdjacentCellTotal(grid):
         if grid[currentRowIndex][currentColumnIndex + 1] == on:
             totalActiveAdjacentCells += 1
 
+    return totalActiveAdjacentCells
+
 
 currentIteration = 0
 
