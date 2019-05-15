@@ -9,10 +9,8 @@ sense.low_light = True
 black = [0, 0, 0]
 off = black
 
-red = [255, 0, 0]
-green = [0, 255, 0]
-yellow = [255, 255, 0]
-on = yellow
+
+on = [255, 255, 0]
 
 
 def initGrid():
@@ -32,12 +30,9 @@ def initGrid():
 grid = initGrid()
 
 currentIteration = 0
+
 while True:
-    if currentIteration == 100:
-        sense.set_pixel(0, 0, red)
-        grid = initGrid()
-        currentIteration = 0
-    time.sleep(0.10)
+    time.sleep(1)
 
     bufferGrid = []
     for currentRowIndex in range(0, 8):
@@ -88,6 +83,13 @@ while True:
                 else:
                     currentBufferRow.append(on)
         bufferGrid.append(currentBufferRow)
+
+    if grid == bufferGrid or currentIteration % 1000 == 0:
+        bufferGrid = initGrid()
+        on[0] = random.randint(0,255)
+        on[1] = random.randint(0,255)
+        on[2] = random.randint(0,255)
+
 
     grid = bufferGrid
 
