@@ -5,8 +5,12 @@ import time
 sense = SenseHat()
 sense.low_light = True
 
-off = [0,0,0]
+secondsPerIteration = 1
+iterationLimit = 1000
+
+off = [0, 0, 0]
 on = [255, 255, 0]
+
 
 def initGrid():
     grid = []
@@ -22,50 +26,53 @@ def initGrid():
     return grid
 
 
-grid = initGrid()
+def getAdjacentCellTotal(grid):
+    totalActiveAdjacentCells = 0
+
+    if currentRowIndex - 1 >= 0:
+        if currentColumnIndex - 1 >= 0:
+            if grid[currentRowIndex - 1][currentColumnIndex - 1] == on:
+                totalActiveAdjacentCells += 1
+
+        if grid[currentRowIndex - 1][currentColumnIndex] == on:
+            totalActiveAdjacentCells += 1
+
+        if currentColumnIndex + 1 <= 7:
+            if grid[currentRowIndex - 1][currentColumnIndex + 1] == on:
+                totalActiveAdjacentCells += 1
+
+    if currentRowIndex + 1 <= 7:
+        if currentColumnIndex - 1 >= 0:
+            if grid[currentRowIndex + 1][currentColumnIndex - 1] == on:
+                totalActiveAdjacentCells += 1
+
+        if grid[currentRowIndex + 1][currentColumnIndex] == on:
+            totalActiveAdjacentCells += 1
+
+        if currentColumnIndex + 1 <= 7:
+            if grid[currentRowIndex + 1][currentColumnIndex + 1] == on:
+                totalActiveAdjacentCells += 1
+
+    if currentColumnIndex - 1 >= 0:
+        if grid[currentRowIndex][currentColumnIndex - 1] == on:
+            totalActiveAdjacentCells += 1
+    if currentColumnIndex + 1 <= 7:
+        if grid[currentRowIndex][currentColumnIndex + 1] == on:
+            totalActiveAdjacentCells += 1
+
 
 currentIteration = 0
 
+grid = initGrid()
 while True:
-    time.sleep(1)
+    time.sleep(secondsPerIteration)
 
     bufferGrid = []
     for currentRowIndex in range(0, 8):
 
         currentBufferRow = []
         for currentColumnIndex in range(0, 8):
-            totalActiveAdjacentCells = 0
-
-            if currentRowIndex - 1 >= 0:
-                if currentColumnIndex - 1 >= 0:
-                    if grid[currentRowIndex - 1][currentColumnIndex - 1] == on:
-                        totalActiveAdjacentCells += 1
-
-                if grid[currentRowIndex - 1][currentColumnIndex] == on:
-                    totalActiveAdjacentCells += 1
-
-                if currentColumnIndex + 1 <= 7:
-                    if grid[currentRowIndex - 1][currentColumnIndex + 1] == on:
-                        totalActiveAdjacentCells += 1
-
-            if currentRowIndex + 1 <= 7:
-                if currentColumnIndex - 1 >= 0:
-                    if grid[currentRowIndex + 1][currentColumnIndex - 1] == on:
-                        totalActiveAdjacentCells += 1
-
-                if grid[currentRowIndex + 1][currentColumnIndex] == on:
-                    totalActiveAdjacentCells += 1
-
-                if currentColumnIndex + 1 <= 7:
-                    if grid[currentRowIndex + 1][currentColumnIndex + 1] == on:
-                        totalActiveAdjacentCells += 1
-
-            if currentColumnIndex - 1 >= 0:
-                if grid[currentRowIndex][currentColumnIndex - 1] == on:
-                    totalActiveAdjacentCells += 1
-            if currentColumnIndex + 1 <= 7:
-                if grid[currentRowIndex][currentColumnIndex + 1] == on:
-                    totalActiveAdjacentCells += 1
+            totalActiveAdjacentCells = getAdjacentCellTotal(grid)
 
             if grid[currentRowIndex][currentColumnIndex] == off:
                 if totalActiveAdjacentCells == 3:
@@ -79,7 +86,7 @@ while True:
                     currentBufferRow.append(on)
         bufferGrid.append(currentBufferRow)
 
-    if grid == bufferGrid or currentIteration == 1000:
+    if grid == bufferGrid or currentIteration == iterationLimit:
         bufferGrid = initGrid()
         on[0] = random.randint(0, 255)
         on[1] = random.randint(0, 255)
