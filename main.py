@@ -11,8 +11,8 @@ off = black
 
 red = [255, 0, 0]
 green = [0, 255, 0]
-on = green
-
+yellow = [255, 255, 0]
+on = yellow
 
 
 def initGrid():
@@ -25,15 +25,16 @@ def initGrid():
                 currentRow.append(on)
             else:
                 currentRow.append(black)
-        grid.append(currentRow)    
+        grid.append(currentRow)
     return grid
+
 
 grid = initGrid()
 
 currentIteration = 0
 while True:
     if currentIteration == 100:
-        sense.set_pixel(0,0,red)
+        sense.set_pixel(0, 0, red)
         grid = initGrid()
         currentIteration = 0
     time.sleep(0.10)
