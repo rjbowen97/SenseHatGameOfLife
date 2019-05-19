@@ -2,102 +2,88 @@ from sense_hat import SenseHat
 import random
 import time
 
-sense = SenseHat()
-sense.low_light = True
 
-secondsPerIteration = 1
-iterationLimit = 1000
+class SenseHatGOL:
+    def __init__(self, secondsPerIteration, iterationLimit):
+        self.secondsPerIteration = secondsPerIteration
+        self.iterationLimit = iterationLimit
+        self.initSenseHat()
+        self.golGrid = GOLGrid()
 
-off = [0, 0, 0]
-on = [255, 255, 0]
+    def initSenseHat(self):
+        self.sense = SenseHat()
+        self.sense.low_light = True
 
-
-def initGrid():
-    grid = []
-
-    for currentRowIndex in range(0, 8):
-        currentRow = []
-        for currentColumnIndex in range(0, 8):
-            if random.randint(0, 1):
-                currentRow.append(on)
-            else:
-                currentRow.append(off)
-        grid.append(currentRow)
-    return grid
-
-
-def getAdjacentCellTotal(grid):
-    totalActiveAdjacentCells = 0
-
-    if currentRowIndex - 1 >= 0:
-        if currentColumnIndex - 1 >= 0:
-            if grid[currentRowIndex - 1][currentColumnIndex - 1] == on:
-                totalActiveAdjacentCells += 1
-
-        if grid[currentRowIndex - 1][currentColumnIndex] == on:
-            totalActiveAdjacentCells += 1
-
-        if currentColumnIndex + 1 <= 7:
-            if grid[currentRowIndex - 1][currentColumnIndex + 1] == on:
-                totalActiveAdjacentCells += 1
-
-    if currentRowIndex + 1 <= 7:
-        if currentColumnIndex - 1 >= 0:
-            if grid[currentRowIndex + 1][currentColumnIndex - 1] == on:
-                totalActiveAdjacentCells += 1
-
-        if grid[currentRowIndex + 1][currentColumnIndex] == on:
-            totalActiveAdjacentCells += 1
-
-        if currentColumnIndex + 1 <= 7:
-            if grid[currentRowIndex + 1][currentColumnIndex + 1] == on:
-                totalActiveAdjacentCells += 1
-
-    if currentColumnIndex - 1 >= 0:
-        if grid[currentRowIndex][currentColumnIndex - 1] == on:
-            totalActiveAdjacentCells += 1
-    if currentColumnIndex + 1 <= 7:
-        if grid[currentRowIndex][currentColumnIndex + 1] == on:
-            totalActiveAdjacentCells += 1
-
-    return totalActiveAdjacentCells
-
-
-currentIteration = 0
-
-grid = initGrid()
-while True:
-    time.sleep(secondsPerIteration)
-
-    bufferGrid = []
-    for currentRowIndex in range(0, 8):
-
-        currentBufferRow = []
-        for currentColumnIndex in range(0, 8):
-            totalActiveAdjacentCells = getAdjacentCellTotal(grid)
-
-            if grid[currentRowIndex][currentColumnIndex] == off:
-                if totalActiveAdjacentCells == 3:
-                    currentBufferRow.append(on)
-                else:
-                    currentBufferRow.append(off)
-            else:
-                if totalActiveAdjacentCells < 2 or totalActiveAdjacentCells > 3:
-                    currentBufferRow.append(off)
-                else:
-                    currentBufferRow.append(on)
-        bufferGrid.append(currentBufferRow)
-
-    if grid == bufferGrid or currentIteration == iterationLimit:
-        bufferGrid = initGrid()
-        on[0] = random.randint(0, 255)
-        on[1] = random.randint(0, 255)
-        on[2] = random.randint(0, 255)
+    def execute(self):
         currentIteration = 0
+        while True:
+            time.sleep(self.secondsPerIteration)
 
-    grid = bufferGrid
+            displayGrid = [
+                currentCell for currentSublist in self.golGrid.grid for currentCell in currentSublist]
+            self.sense.set_pixels(displayGrid)
+            currentIteration += 1
 
-    displayGrid = [
-        currentCell for currentSublist in grid for currentCell in currentSublist]
-    sense.set_pixels(displayGrid)
-    currentIteration += 1
+
+class GOLGrid:
+    def __init__(self):
+        self.initGrid()
+
+    def initGrid(self):
+        self.grid = []
+
+        for currentRowIndex in range(0, 8):
+            currentRow = []
+            for currentColumnIndex in range(0, 8):
+                currentRow.append(False)
+            self.grid.append(currentRow)
+
+    def stepGridForward(self):
+        bufferGrid = []
+        for currentRowIndex in range(0, 8):
+            currentBufferRow = []
+            for currentColumnIndex in range(0, 8):
+                totalActiveAdjacentCells = self.getTotalLivingNeighborsOfTargetCell(
+                    currentRowIndex, currentColumnIndex)
+
+                if self.grid[currentRowIndex][currentColumnIndex] == False:
+                    if totalActiveAdjacentCells == 3:
+                        currentBufferRow.append(True)
+                    else:
+                        currentBufferRow.append(False)
+                else:
+                    if totalActiveAdjacentCells < 2 or totalActiveAdjacentCells > 3:
+                        currentBufferRow.append(False)
+                    else:
+                        currentBufferRow.append(True)
+            bufferGrid.append(currentBufferRow)
+        self.grid = bufferGrid
+
+    def getTotalLivingNeighborsOfTargetCell(self, targetCellRow, targetCellColumn):
+        totalLivingNeighbors = 0
+
+        if self.grid[(targetCellRow - 1) % 8][(targetCellColumn - 1) % 8]:
+            totalLivingNeighbors += 1
+
+        if self.grid[(targetCellRow - 1) % 8][(targetCellColumn) % 8]:
+            totalLivingNeighbors += 1
+
+        if self.grid[(targetCellRow - 1) % 8][(targetCellColumn + 1) % 8]:
+            totalLivingNeighbors += 1
+
+        if self.grid[(targetCellRow + 1) % 8][(targetCellColumn - 1) % 8]:
+            totalLivingNeighbors += 1
+
+        if self.grid[(targetCellRow + 1) % 8][(targetCellColumn) % 8]:
+            totalLivingNeighbors += 1
+
+        if self.grid[(targetCellRow + 1) % 8][(targetCellColumn + 1) % 8]:
+            totalLivingNeighbors += 1
+
+        if self.grid[(targetCellRow) % 8][(targetCellColumn - 1) % 8]:
+            totalLivingNeighbors += 1
+
+        if self.grid[(targetCellRow) % 8][(targetCellColumn + 1) % 8]:
+            totalLivingNeighbors += 1
+
+        return totalLivingNeighbors
